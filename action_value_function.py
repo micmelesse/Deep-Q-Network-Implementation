@@ -1,5 +1,3 @@
-# Michael will implement this part
-
 class ActionValueFunction:
     # initializes action-value function Q with random weights
     def __init__(self):
