@@ -1,3 +1,2 @@
-dns=$(cat aws.config)
+dns=$(cat aws.params)
 ssh -i "cos_429.pem" ubuntu@$dns
-
