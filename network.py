@@ -45,16 +45,16 @@ class network:
         # output layer for an arbitry number n of actions
         self.q_predicted = tf.contrib.layers.fully_connected(
             self.fc_output, num_of_actions, activation_fn=None)
-        print(self.q_predicted.shape)
 
         # loss
-        self.q_target = tf.placeholder(
-            shape=[None, num_of_actions], dtype=tf.float32)
-        print(self.q_target.shape)
+
+        self.q_target = tf.placeholder(dtype=tf.float32)
+        self.ind = tf.placeholder(tf.int32)
+
         self.loss = tf.reduce_sum(
-            tf.square(self.q_target - self.q_predicted))
+            tf.square(self.q_target - self.q_predicted[0, self.ind]))
         self.optimizing_op = tf.train.GradientDescentOptimizer(
-            0.1).minimize(self.loss)
+            0.00025).minimize(self.loss)
 
         self.sess = tf.InteractiveSession()
         tf.global_variables_initializer().run()
@@ -66,8 +66,9 @@ class network:
         return self.sess.run([self.q_predicted], fd)[0]
 
      # trains the Q network using SGD
-    def backpropagate(self, cur_frames, target_Q):
-        fd = {self.net_input: cur_frames, self.q_target: target_Q}
+    def backpropagate(self, cur_frames, ind, target_Q):
+        fd = {self.net_input: cur_frames,
+              self.q_target: target_Q, self.ind: ind}
         return self.sess.run([self.loss, self.optimizing_op], fd)[0]
 
     def preprocess(self, rgb_frames):

@@ -11,16 +11,17 @@ import random
 import matplotlib.pyplot as plt
 
 # set parameters, these are in the paper
-REPLAY_MEMORY_SIZE = 10000
-REPLAY_MINIBATCH_SIZE = 32
+REPLAY_MEMORY_SIZE = 1000  # 10000
+REPLAY_START_SIZE = int(REPLAY_MEMORY_SIZE / 50)
+REPLAY_MINIBATCH_SIZE = 5  # 32
 AGENT_HISTORY_LENGTH = 4
 TARGET_NETWORK_UPDATE_FREQUENCY = 10000
 DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
-REPLAY_START_SIZE = 10  # int(REPLAY_MEMORY_SIZE / 50)
-NUM_EPISODES = 10  # 100
+
+NUM_EPISODES = 1  # 100
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
@@ -67,6 +68,7 @@ step = 0
 e = INITIAL_EXPLORATION
 e_decrease = (INITIAL_EXPLORATION - FINAL_EXPLORATION) / \
     FINAL_EXPLORATION_FRAME
+
 while (episode < NUM_EPISODES):
     is_game_over = 0
 
@@ -98,13 +100,14 @@ while (episode < NUM_EPISODES):
         q_target = net.evaluate(net.preprocess(sample[3]))
         r = sample[2]
         if (sample[4]):
-            t = r
+            target = r
         else:
-            t = r + DISCOUNT_FACTOR * max(q_target)
+            target = r + DISCOUNT_FACTOR * np.max(q_target)
         # network.backpropagate((t - values[sample[1]]) ** 2)
-        loss.append(net.backpropagate(net.preprocess(sample[0]), q_target))
-        print(loss[-1])
-
+        loss.append(net.backpropagate(net.preprocess(
+            sample[0]), np.argmax(q_target), target))
+        # print(loss[-1])
+    print(loss)
     plt.plot(loss)
 
     state1 = np.copy(state2)
