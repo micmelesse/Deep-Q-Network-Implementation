@@ -25,7 +25,7 @@ NUM_EPISODES = 1  # 100
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
-pong_path = atari_py.get_game_path('pong')
+pong_path = atari_py.get_game_path('breakout')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
 num_of_actions = len(legal_actions)
@@ -76,7 +76,7 @@ while (episode < NUM_EPISODES):
     if (np.random.sample() < e):
         action = np.random.choice(legal_actions)
     else:
-        action = np.argmax(net.evaluate(state1))
+        action = np.argmax(net.evaluate(net.preprocess(state1)))
 
     # carry out action and observe reward
     for i in range(AGENT_HISTORY_LENGTH):
