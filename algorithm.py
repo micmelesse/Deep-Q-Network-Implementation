@@ -11,9 +11,9 @@ import random
 import matplotlib.pyplot as plt
 
 # set parameters, these are in the paper
-REPLAY_MEMORY_SIZE = 1000  # 10000
+REPLAY_MEMORY_SIZE = 10000
 REPLAY_START_SIZE = int(REPLAY_MEMORY_SIZE / 50)
-REPLAY_MINIBATCH_SIZE = 5  # 32
+REPLAY_MINIBATCH_SIZE = 32
 AGENT_HISTORY_LENGTH = 4
 TARGET_NETWORK_UPDATE_FREQUENCY = 10000
 DISCOUNT_FACTOR = 0.99
@@ -21,7 +21,7 @@ INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
 
-NUM_EPISODES = 1  # 100
+NUM_EPISODES = 100
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
@@ -60,7 +60,6 @@ for i in range(REPLAY_START_SIZE):
     state1 = np.copy(state2)
 
 # initialize action-value function Q with random weights and its target clone
-net = network(screen_height, screen_width, num_of_actions)
 
 # main loop
 episode = 0
@@ -69,6 +68,9 @@ e = INITIAL_EXPLORATION
 e_decrease = (INITIAL_EXPLORATION - FINAL_EXPLORATION) / \
     FINAL_EXPLORATION_FRAME
 
+loss = []
+rewards = []
+net = network(screen_height, screen_width, num_of_actions)
 while (episode < NUM_EPISODES):
     is_game_over = 0
 
@@ -81,6 +83,7 @@ while (episode < NUM_EPISODES):
     # carry out action and observe reward
     for i in range(AGENT_HISTORY_LENGTH):
         reward = ale.act(action)
+        rewards.append(reward)
         if (ale.game_over()):
             is_game_over = 1
         ale.getScreenRGB(screen_data)
@@ -95,7 +98,6 @@ while (episode < NUM_EPISODES):
     D_sample = random.sample(D, REPLAY_MINIBATCH_SIZE)
 
     # calculate target for each minibatch transition
-    loss = []
     for sample in D_sample:
         q_target = net.evaluate(net.preprocess(sample[3]))
         r = sample[2]
@@ -106,9 +108,6 @@ while (episode < NUM_EPISODES):
         # network.backpropagate((t - values[sample[1]]) ** 2)
         loss.append(net.backpropagate(net.preprocess(
             sample[0]), np.argmax(q_target), target))
-        # print(loss[-1])
-    print(loss)
-    plt.plot(loss)
 
     state1 = np.copy(state2)
 
@@ -122,4 +121,12 @@ while (episode < NUM_EPISODES):
 
     if (is_game_over):
         ale.reset_game()
-        episode = episode + 1
+    episode = episode + 1
+
+plt.plot(loss)
+plt.savefig('loss_plot_for_{}_episodes.png'.format(
+    NUM_EPISODES), bbox_inches='tight')
+plt.clf()
+plt.plot(rewards)
+plt.savefig('reward_plot_for_{}_episodes.png'.format(
+    NUM_EPISODES), bbox_inches='tight')
