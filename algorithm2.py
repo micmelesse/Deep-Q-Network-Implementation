@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# Implements the Deep Q-Learning Algorithm as shown in the DeepMind paper,
-# while visualzing the game using pygame
+# Implements the Deep Q-Learning Algorithm as shown in the DeepMind paper
 
 import sys
 import atari_py
@@ -13,15 +12,15 @@ import matplotlib.pyplot as plt
 import pygame
 
 # set parameters, these are in the paper
-REPLAY_MEMORY_SIZE = 10000
-REPLAY_MINIBATCH_SIZE = 7
+REPLAY_MEMORY_SIZE = 100000  # 10000
+REPLAY_START_SIZE = int(REPLAY_MEMORY_SIZE / 50)
+REPLAY_MINIBATCH_SIZE = 7  # 32
 AGENT_HISTORY_LENGTH = 4
 TARGET_NETWORK_UPDATE_FREQUENCY = 10000
 DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
-FINAL_EXPLORATION_FRAME = 10000
-REPLAY_START_SIZE = 1000  # int(REPLAY_MEMORY_SIZE / 50)
+FINAL_EXPLORATION_FRAME = 100000
 NUM_EPISODES = 10  # 100
 
 def show_screen(screen_data, screen):
@@ -52,7 +51,6 @@ state2 = np.zeros((AGENT_HISTORY_LENGTH, screen_height,
 
 # observe initial state
 a = np.random.choice(legal_actions)
-print(a)
 for i in range(AGENT_HISTORY_LENGTH):
     ale.act(a)
     ale.getScreenRGB(screen_data)
@@ -63,7 +61,6 @@ D = []
 for i in range(REPLAY_START_SIZE):
     is_game_over = 0
     a = np.random.choice(legal_actions)
-    print(a)
     for j in range(AGENT_HISTORY_LENGTH):
         r = ale.act(a)
         if (ale.game_over()):
@@ -82,6 +79,7 @@ step = 0
 e = INITIAL_EXPLORATION
 e_decrease = (INITIAL_EXPLORATION - FINAL_EXPLORATION) / \
     FINAL_EXPLORATION_FRAME
+
 while (episode < NUM_EPISODES):
     exit = False
     for event in pygame.event.get():
@@ -98,8 +96,6 @@ while (episode < NUM_EPISODES):
         action = np.random.choice(legal_actions)
     else:
         action = np.argmax(net.evaluate(net.preprocess(state1)))
-
-    print(action)
 
     # carry out action and observe reward
     for i in range(AGENT_HISTORY_LENGTH):
@@ -124,13 +120,14 @@ while (episode < NUM_EPISODES):
         q_target = net.evaluate(net.preprocess(sample[3]))
         r = sample[2]
         if (sample[4]):
-            t = r
+            target = r
         else:
-            t = r + DISCOUNT_FACTOR * max(q_target)
+            target = r + DISCOUNT_FACTOR * np.max(q_target)
         # network.backpropagate((t - values[sample[1]]) ** 2)
-        loss.append(net.backpropagate(net.preprocess(sample[0]), q_target))
-        print(loss[-1])
-
+        loss.append(net.backpropagate(net.preprocess(
+            sample[0]), np.argmax(q_target), target))
+        # print(loss[-1])
+    print(loss)
     # plt.plot(loss)
 
     state1 = np.copy(state2)
