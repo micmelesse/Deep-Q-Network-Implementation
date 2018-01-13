@@ -19,8 +19,8 @@ DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
-REPLAY_START_SIZE = int(REPLAY_MEMORY_SIZE / 50)
-NUM_EPISODES = 100
+REPLAY_START_SIZE = 10  # int(REPLAY_MEMORY_SIZE / 50)
+NUM_EPISODES = 10  # 100
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
@@ -38,7 +38,7 @@ state2 = np.zeros((AGENT_HISTORY_LENGTH, screen_height,
                    screen_width, 3), dtype=np.uint8)
 
 # observe initial state
-a = legal_actions[np.random.randint(legal_actions.size)]
+a = np.random.choice(legal_actions)
 for i in range(AGENT_HISTORY_LENGTH):
     ale.act(a)
     ale.getScreenRGB(screen_data)
@@ -48,7 +48,7 @@ for i in range(AGENT_HISTORY_LENGTH):
 D = []
 for i in range(REPLAY_START_SIZE):
     is_game_over = 0
-    a = legal_actions[np.random.randint(legal_actions.size)]
+    a = np.random.choice(legal_actions)
     for j in range(AGENT_HISTORY_LENGTH):
         r = ale.act(a)
         if (ale.game_over()):
@@ -72,7 +72,7 @@ while (episode < NUM_EPISODES):
 
     # select an action a
     if (np.random.sample() < e):
-        action = legal_actions[np.random.randint(legal_actions.size)]
+        action = np.random.choice(legal_actions)
     else:
         action = np.argmax(net.evaluate(state1))
 
@@ -93,6 +93,7 @@ while (episode < NUM_EPISODES):
     D_sample = random.sample(D, REPLAY_MINIBATCH_SIZE)
 
     # calculate target for each minibatch transition
+    loss = []
     for sample in D_sample:
         q_target = net.evaluate(net.preprocess(sample[3]))
         r = sample[2]
@@ -101,8 +102,10 @@ while (episode < NUM_EPISODES):
         else:
             t = r + DISCOUNT_FACTOR * max(q_target)
         # network.backpropagate((t - values[sample[1]]) ** 2)
-        loss = net.backpropagate(net.preprocess(sample[0]), q_target)
-        print(loss)
+        loss.append(net.backpropagate(net.preprocess(sample[0]), q_target))
+        print(loss[-1])
+
+    plt.plot(loss)
 
     state1 = np.copy(state2)
 
