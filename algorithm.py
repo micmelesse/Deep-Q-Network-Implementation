@@ -19,7 +19,7 @@ DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
-REPLAY_START_SIZE = REPLAY_MEMORY_SIZE / 50
+REPLAY_START_SIZE = int(REPLAY_MEMORY_SIZE / 50)
 NUM_EPISODES = 100
 
 # initialize ALE interface
@@ -59,7 +59,7 @@ for i in range(REPLAY_START_SIZE):
     state1 = np.copy(state2)
 
 # initialize action-value function Q with random weights and its target clone
-net = network(screen_height, screen_height, num_of_actions)
+net = network(screen_height, screen_width, num_of_actions)
 
 # main loop
 episode = 0
@@ -94,14 +94,15 @@ while (episode < NUM_EPISODES):
 
     # calculate target for each minibatch transition
     for sample in D_sample:
-        q_target = net.evaluate(sample[3])
+        q_target = net.evaluate(net.preprocess(sample[3]))
         r = sample[2]
         if (sample[4]):
             t = r
         else:
             t = r + DISCOUNT_FACTOR * max(q_target)
         # network.backpropagate((t - values[sample[1]]) ** 2)
-        network.backpropagate(sample[0], q_target)
+        loss = net.backpropagate(net.preprocess(sample[0]), q_target)
+        print(loss)
 
     state1 = np.copy(state2)
 
