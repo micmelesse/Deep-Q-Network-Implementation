@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
-# Implements the Deep Q-Learning Algorithm as shown in the DeepMind paper
+# Implements the Deep Q-Learning Algorithm as shown in the DeepMind paper,
+# while visualzing the game using pygame
 
 import sys
 import atari_py
@@ -13,14 +14,14 @@ import pygame
 
 # set parameters, these are in the paper
 REPLAY_MEMORY_SIZE = 10000
-REPLAY_MINIBATCH_SIZE = 32
+REPLAY_MINIBATCH_SIZE = 7
 AGENT_HISTORY_LENGTH = 4
 TARGET_NETWORK_UPDATE_FREQUENCY = 10000
 DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
-FINAL_EXPLORATION_FRAME = 1000000
-REPLAY_START_SIZE = 100  # int(REPLAY_MEMORY_SIZE / 50)
+FINAL_EXPLORATION_FRAME = 10000
+REPLAY_START_SIZE = 1000  # int(REPLAY_MEMORY_SIZE / 50)
 NUM_EPISODES = 10  # 100
 
 def show_screen(screen_data, screen):
@@ -55,7 +56,6 @@ print(a)
 for i in range(AGENT_HISTORY_LENGTH):
     ale.act(a)
     ale.getScreenRGB(screen_data)
-    show_screen(screen_data, screen)
     state1[i] = np.copy(screen_data)
 
 # initialize replay memory D
@@ -69,7 +69,6 @@ for i in range(REPLAY_START_SIZE):
         if (ale.game_over()):
             is_game_over = 1
         ale.getScreenRGB(screen_data)
-        show_screen(screen_data, screen)
         state2[j] = np.copy(screen_data)
     D.append((np.copy(state1), a, r, np.copy(state2), is_game_over))
     state1 = np.copy(state2)
@@ -98,7 +97,7 @@ while (episode < NUM_EPISODES):
     if (np.random.sample() < e):
         action = np.random.choice(legal_actions)
     else:
-        action = np.argmax(net.evaluate(state1))
+        action = np.argmax(net.evaluate(net.preprocess(state1)))
 
     print(action)
 
