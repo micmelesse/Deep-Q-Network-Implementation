@@ -2,12 +2,14 @@
 
 # Plays breakout using neural net restored from saved folder
 
+import os
 import sys
 import atari_py
 import numpy as np
 import pygame
 from network import network
-import os
+import matplotlib.pyplot as plt
+
 
 AGENT_HISTORY_LENGTH = 4
 
@@ -26,7 +28,8 @@ print("available actions {}".format(legal_actions))
 print("width/height: " + str(screen_width) + "/" + str(screen_height))
 
 # init network
-net = network(screen_height, screen_width, len(legal_actions))
+learning_rate = 0.00025
+net = network(learning_rate,screen_height, screen_width, len(legal_actions))
 net.restore(os.path.join('aws_models', sys.argv[1]))
 
 # init pygame
@@ -49,8 +52,10 @@ for i in range(AGENT_HISTORY_LENGTH):
     state1[i] = np.copy(screen_data)
 
 episode = 0
+n_frame = 0
 total_reward = 0.0
 while (episode < 1):
+    n_frame += 1
     exit = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -61,10 +66,11 @@ while (episode < 1):
 
     q_values = net.evaluate(net.preprocess(state1))
     action = legal_actions[np.argmax(q_values)]
-    print ("action %d" % action)
+    # print ("action %d" % action)
     reward = ale.act(action)
     total_reward += reward
     ale.getScreenRGB(screen_data)
+    plt.imsave("screen_shots/screen_shot_{}.png".format(n_frame), screen_data)
     screen_data_rot = np.flipud(np.rot90(screen_data))
     screen.blit(pygame.pixelcopy.make_surface(screen_data_rot), (0, 0))
     pygame.display.flip()

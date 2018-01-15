@@ -9,7 +9,7 @@ from datetime import datetime
 
 class network:
     # initializes dqn
-    def __init__(self, screen_height, screen_width, num_of_actions):
+    def __init__(self, learning_rate, screen_height, screen_width, num_of_actions):
         # self.net_graph = tf.Graph()
         # with self.net_graph.as_default():
         # build graph for network
@@ -57,7 +57,7 @@ class network:
         self.loss = tf.reduce_sum(
             tf.square(self.q_target - self.q_predicted[0, self.ind]))
         self.optimizing_op = tf.train.GradientDescentOptimizer(
-            0.0000001).minimize(self.loss)
+            learning_rate).minimize(self.loss)
 
         self.sess = tf.InteractiveSession()
         self.saver = tf.train.Saver()

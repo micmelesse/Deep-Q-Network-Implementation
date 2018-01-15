@@ -73,7 +73,9 @@ losses = []
 rewards = []
 scores = []
 net = network(screen_height, screen_width, num_of_actions)
-net.restore(os.path.join('aws_models', sys.argv[1]))
+model_dir = os.path.join('aws_models', sys.argv[1])
+net.restore(model_dir)
+print("model restored from {}".format(model_dir))
 start_time = time.time()
 episode_time = start_time
 while (episode < NUM_EPISODES):
@@ -135,7 +137,7 @@ while (episode < NUM_EPISODES):
         episode = episode + 1
         scores.append(score)
         score = 0
-        print("--- Episode %d took %s seconds ---" %
+        print("--- New episode %d took %s seconds ---" %
               (episode, time.time() - episode_time))
         episode_time = time.time()
 
