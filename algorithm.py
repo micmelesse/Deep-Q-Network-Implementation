@@ -10,7 +10,7 @@ from network import network
 import random
 
 # set parameters, these are in the paper
-REPLAY_MEMORY_SIZE = 10000
+REPLAY_MEMORY_SIZE = 1000000
 REPLAY_START_SIZE = int(REPLAY_MEMORY_SIZE / 50)
 REPLAY_MINIBATCH_SIZE = 32
 AGENT_HISTORY_LENGTH = 4
@@ -20,7 +20,7 @@ INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
 
-NUM_EPISODES = 2
+NUM_EPISODES = 1
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
