@@ -2,13 +2,13 @@
 #
 # Implements the Deep Q-Learning Algorithm as shown in the DeepMind paper
 
+
 import sys
 import atari_py
 import numpy as np
 from action_value_function import ActionValueFunction
 from network import network
 import random
-import matplotlib.pyplot as plt
 
 # set parameters, these are in the paper
 REPLAY_MEMORY_SIZE = 10000
@@ -21,7 +21,7 @@ INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
 
-NUM_EPISODES = 10000
+NUM_EPISODES = 2
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
@@ -68,10 +68,12 @@ e = INITIAL_EXPLORATION
 e_decrease = (INITIAL_EXPLORATION - FINAL_EXPLORATION) / \
     FINAL_EXPLORATION_FRAME
 
-loss = []
+losses = []
 rewards = []
+scores = []
 net = network(screen_height, screen_width, num_of_actions)
 while (episode < NUM_EPISODES):
+    score = 0
     is_game_over = 0
 
     # select an action a
@@ -84,6 +86,7 @@ while (episode < NUM_EPISODES):
     for i in range(AGENT_HISTORY_LENGTH):
         reward = ale.act(action)
         rewards.append(reward)
+        score += reward
         if (ale.game_over()):
             is_game_over = 1
         ale.getScreenRGB(screen_data)
@@ -106,7 +109,7 @@ while (episode < NUM_EPISODES):
         else:
             target = r + DISCOUNT_FACTOR * np.max(q_target)
         # network.backpropagate((t - values[sample[1]]) ** 2)
-        loss.append(net.backpropagate(net.preprocess(
+        losses.append(net.backpropagate(net.preprocess(
             sample[0]), np.argmax(q_target), target))
 
     state1 = np.copy(state2)
@@ -122,11 +125,6 @@ while (episode < NUM_EPISODES):
     if (is_game_over):
         ale.reset_game()
     episode = episode + 1
+    scores.append(score)
 
-plt.plot(loss)
-plt.savefig('loss_plot_for_{}_episodes.png'.format(
-    NUM_EPISODES), bbox_inches='tight')
-plt.clf()
-plt.plot(rewards)
-plt.savefig('reward_plot_for_{}_episodes.png'.format(
-    NUM_EPISODES), bbox_inches='tight')
+net.save(losses,rewards,scores)

@@ -1,6 +1,9 @@
+import os
 import numpy as np
 import tensorflow as tf
 from PIL import Image
+import matplotlib.pyplot as plt
+from datetime import datetime
 # Michael will implement this part
 
 
@@ -57,6 +60,7 @@ class network:
             0.00001).minimize(self.loss)
 
         self.sess = tf.InteractiveSession()
+        self.saver = tf.train.Saver()
         tf.global_variables_initializer().run()
 
     # returns a 1-D array whose indices correspond to actions, and values
@@ -77,3 +81,17 @@ class network:
             f = Image.fromarray(f).convert('L')
             frames.append(np.array(f))
         return np.expand_dims(np.stack(frames, axis=-1), axis=0)
+
+    def save(self, losses, rewards, scores):
+
+        save_dir = "model_{}".format(str(datetime.now().time()))
+        os.makedirs(save_dir)
+        plt.plot(losses)
+        plt.savefig('{}/loss_plot.png'.format(save_dir), bbox_inches='tight')
+        plt.clf()
+        plt.plot(rewards)
+        plt.savefig('{}/reward_plot.png'.format(save_dir), bbox_inches='tight')
+        plt.clf()
+        plt.plot(scores)
+        plt.savefig('{}/score_plot.png'.format(save_dir), bbox_inches='tight')
+        self.saver.save(self.sess, "{}/model.ckpt".format(save_dir))
