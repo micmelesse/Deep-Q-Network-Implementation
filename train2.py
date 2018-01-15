@@ -119,9 +119,6 @@ while (episode < NUM_EPISODES):
 
     state1 = np.copy(state2)
 
-    if e > FINAL_EXPLORATION:
-        e = e - e_decrease
-
     # step = step + 1
     # if (step == TARGET_NETWORK_UPDATE_FREQUENCY):
     #     Q_target = Q.copy()
