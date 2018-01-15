@@ -20,6 +20,7 @@ AGENT_HISTORY_LENGTH = 4
 DISCOUNT_FACTOR = 0.99
 EXPLORATION_RATE = 0.4
 NUM_EPISODES = 25
+learning_rate = 0.00025
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
@@ -69,7 +70,6 @@ e = EXPLORATION_RATE
 losses = []
 rewards = []
 scores = []
-learning_rate = 0.0000001
 net = network(learning_rate, screen_height, screen_width, num_of_actions)
 start_time = time.time()
 episode_time = start_time
