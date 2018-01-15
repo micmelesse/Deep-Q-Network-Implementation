@@ -87,20 +87,22 @@ while (episode < NUM_EPISODES):
     # carry out action and observe reward
     reward_sum = 0.0
     for i in range(AGENT_HISTORY_LENGTH):
+        print("action {}".format(action))
         r = ale.act(action)
         reward_sum = reward_sum + r
         if (ale.game_over()):
             is_game_over = 1
         ale.getScreenRGB(screen_data)
         state2[i] = np.copy(screen_data)
-    reward_avg = reward_sum/AGENT_HISTORY_LENGTH
+    reward_avg = reward_sum / AGENT_HISTORY_LENGTH
     score = score + reward_sum
     rewards.append(reward_sum)
 
     # store transition <s, a, r, s'> in replay memory D
     if (len(D) == REPLAY_MEMORY_SIZE):
         D.pop(0)
-    D.append((np.copy(state1), action, reward_sum, np.copy(state2), is_game_over))
+    D.append((np.copy(state1), action, reward_sum,
+              np.copy(state2), is_game_over))
 
     # sample random transitions <ss, aa, rr, ss'> from replay memory D
     D_sample = random.sample(D, REPLAY_MINIBATCH_SIZE)
@@ -132,7 +134,8 @@ while (episode < NUM_EPISODES):
         episode = episode + 1
         scores.append(score)
         score = 0
-        print("--- Episode %d took %s seconds ---" % (episode, time.time() - episode_time))
+        print("--- Episode %d took %s seconds ---" %
+              (episode, time.time() - episode_time))
         episode_time = time.time()
 
 net.save(losses, rewards, scores)
