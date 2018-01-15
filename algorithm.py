@@ -20,7 +20,7 @@ DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
-NUM_EPISODES = 1
+NUM_EPISODES = 2
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
@@ -63,14 +63,14 @@ for i in range(REPLAY_START_SIZE):
 # main loop
 episode = 0
 step = 0
-score = 0
 e = INITIAL_EXPLORATION
 e_decrease = (INITIAL_EXPLORATION - FINAL_EXPLORATION) / \
     FINAL_EXPLORATION_FRAME
 
-losses = []
-rewards = []
-scores = []
+all_loss = []
+all_rewards = []
+loss_per_ep = []
+reward_per_ep = []
 net = network(screen_height, screen_width, num_of_actions)
 start_time = time.time()
 episode_time = start_time
@@ -84,22 +84,21 @@ while (episode < NUM_EPISODES):
         action = np.argmax(net.evaluate(net.preprocess(state1)))
 
     # carry out action and observe reward
-    reward = 0.0
+    reward_sum = 0.0
     for i in range(AGENT_HISTORY_LENGTH):
         r = ale.act(action)
-        reward = reward + r
-        score = score + r
-        rewards.append(r)
+        reward_sum = reward_sum + r
         if (ale.game_over()):
             is_game_over = 1
         ale.getScreenRGB(screen_data)
         state2[i] = np.copy(screen_data)
-    # reward = reward/AGENT_HISTORY_LENGTH
+    reward_avg = reward_sum/AGENT_HISTORY_LENGTH
+    reward_per_ep.append(reward_sum)
 
     # store transition <s, a, r, s'> in replay memory D
     if (len(D) == REPLAY_MEMORY_SIZE):
         D.pop(0)
-    D.append((np.copy(state1), action, reward, np.copy(state2), is_game_over))
+    D.append((np.copy(state1), action, reward_sum, np.copy(state2), is_game_over))
 
     # sample random transitions <ss, aa, rr, ss'> from replay memory D
     D_sample = random.sample(D, REPLAY_MINIBATCH_SIZE)
@@ -113,8 +112,10 @@ while (episode < NUM_EPISODES):
         else:
             target = r + DISCOUNT_FACTOR * np.max(q_target)
         # network.backpropagate((t - values[sample[1]]) ** 2)
-        losses.append(net.backpropagate(net.preprocess(
+        loss_per_ep.append(net.backpropagate(net.preprocess(
             sample[0]), np.argmax(q_target), target))
+
+    # print(loss_per_ep)
 
     state1 = np.copy(state2)
 
@@ -129,9 +130,15 @@ while (episode < NUM_EPISODES):
     if (is_game_over):
         ale.reset_game()
         episode = episode + 1
-        scores.append(score)
+        all_loss.append(loss_per_ep)
+        all_rewards.append(reward_per_ep)
+        loss_per_ep = []
+        reward_per_ep = []
         print("--- Episode took %s seconds ---" % (time.time() - episode_time))
         episode_time = time.time()
 
-net.save(losses, rewards, scores)
+all_loss = np.array(all_loss)[1:] # first episode is garbage
+all_rewards = np.array(all_rewards)[1:]
+all_scores = np.sum(all_rewards, axis=1)[1:]
+net.save(all_loss.flatten(), all_rewards.flatten(), all_scores)
 print("--- Program took %s seconds ---" % (time.time() - start_time))
