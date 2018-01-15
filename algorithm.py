@@ -62,15 +62,15 @@ for i in range(REPLAY_START_SIZE):
 
 # main loop
 episode = 0
-step = 0
+# step = 0
+score = 0
 e = INITIAL_EXPLORATION
 e_decrease = (INITIAL_EXPLORATION - FINAL_EXPLORATION) / \
     FINAL_EXPLORATION_FRAME
 
-all_loss = []
-all_rewards = []
-loss_per_ep = []
-reward_per_ep = []
+losses = []
+rewards = []
+scores = []
 net = network(screen_height, screen_width, num_of_actions)
 start_time = time.time()
 episode_time = start_time
@@ -93,7 +93,8 @@ while (episode < NUM_EPISODES):
         ale.getScreenRGB(screen_data)
         state2[i] = np.copy(screen_data)
     reward_avg = reward_sum/AGENT_HISTORY_LENGTH
-    reward_per_ep.append(reward_sum)
+    score = score + reward_sum
+    rewards.append(reward_sum)
 
     # store transition <s, a, r, s'> in replay memory D
     if (len(D) == REPLAY_MEMORY_SIZE):
@@ -112,10 +113,8 @@ while (episode < NUM_EPISODES):
         else:
             target = r + DISCOUNT_FACTOR * np.max(q_target)
         # network.backpropagate((t - values[sample[1]]) ** 2)
-        loss_per_ep.append(net.backpropagate(net.preprocess(
+        losses.append(net.backpropagate(net.preprocess(
             sample[0]), np.argmax(q_target), target))
-
-    # print(loss_per_ep)
 
     state1 = np.copy(state2)
 
@@ -130,17 +129,10 @@ while (episode < NUM_EPISODES):
     if (is_game_over):
         ale.reset_game()
         episode = episode + 1
-        all_loss.append(loss_per_ep)
-        all_rewards.append(reward_per_ep)
-        loss_per_ep = []
-        reward_per_ep = []
+        scores.append(score)
+        score = 0
         print("--- Episode took %s seconds ---" % (time.time() - episode_time))
         episode_time = time.time()
 
-all_scores = []
-i = 0
-for l in all_rewards:
-    all_scores[i] = sum(l)
-    i = i+1
-net.save(all_loss[-1], all_rewards[-1], all_scores)
+net.save(losses, rewards, scores)
 print("--- Program took %s seconds ---" % (time.time() - start_time))
