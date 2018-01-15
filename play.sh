@@ -1,1 +1,1 @@
-python main.py model_50_episodes
+python play.py model_50_episodes
