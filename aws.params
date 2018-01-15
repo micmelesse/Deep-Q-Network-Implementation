@@ -1,1 +1,2 @@
-ec2-18-217-220-129.us-east-2.compute.amazonaws.com
+key=cos429_aws_key.pem
+dns=ec2-18-217-220-129.us-east-2.compute.amazonaws.com

@@ -15,6 +15,8 @@ if (len(sys.argv) != 2):
     print("Usage: \"python main.py [save folder name]\"")
     quit()
 
+
+
 # init ALE
 ale = atari_py.ALEInterface()
 pong_path = atari_py.get_game_path('breakout')
