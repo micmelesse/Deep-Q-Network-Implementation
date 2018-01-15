@@ -2,13 +2,14 @@
 #
 # Implements the Deep Q-Learning Algorithm as shown in the DeepMind paper
 
-
+import os
 import sys
 import atari_py
 import numpy as np
 from network import network
 import random
 import time
+os.makedirs("save_dir")
 
 # set parameters, these are in the paper
 REPLAY_MEMORY_SIZE = 1000000
@@ -18,7 +19,7 @@ AGENT_HISTORY_LENGTH = 4
 # TARGET_NETWORK_UPDATE_FREQUENCY = 10000
 DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
-FINAL_EXPLORATION = 0.4
+FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
 NUM_EPISODES = 200
 learning_rate = 0.0000001
@@ -138,7 +139,7 @@ while (episode < NUM_EPISODES):
         print("--- Episode %d took %s seconds ---" %
               (episode, time.time() - episode_time))
         episode_time = time.time()
-        net.save(losses, rewards, scores)
+        net.save(save_dir, losses, rewards, scores)
 net.save(losses, rewards, scores)
 
 
