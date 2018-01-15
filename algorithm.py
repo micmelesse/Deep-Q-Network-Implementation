@@ -137,8 +137,10 @@ while (episode < NUM_EPISODES):
         print("--- Episode took %s seconds ---" % (time.time() - episode_time))
         episode_time = time.time()
 
-all_loss = np.array(all_loss)[1:] # first episode is garbage
-all_rewards = np.array(all_rewards)[1:]
-# all_scores = all_rewards.sum(axis=1)[1:]
-net.save(all_loss.flatten(), all_rewards.flatten(), all_scores)
+all_scores = []
+i = 0
+for l in all_rewards:
+    all_scores[i] = sum(l)
+    i = i+1
+net.save(all_loss[-1], all_rewards[-1], all_scores)
 print("--- Program took %s seconds ---" % (time.time() - start_time))
