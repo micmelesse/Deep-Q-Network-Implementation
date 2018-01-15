@@ -85,10 +85,10 @@ class network:
     def save(self, losses, rewards, scores):
         save_dir = "model_{}".format(str(datetime.now().time()))
         os.makedirs(save_dir)
-        plt.plot(losses)
+        plt.plot(losses[10:])
         plt.savefig('{}/loss_plot.png'.format(save_dir), bbox_inches='tight')
         plt.clf()
-        plt.plot(rewards)
+        plt.plot(rewards[10:])
         plt.savefig('{}/reward_plot.png'.format(save_dir), bbox_inches='tight')
         plt.clf()
         plt.plot(scores)
