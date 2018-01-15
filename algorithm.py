@@ -115,7 +115,7 @@ while (episode < NUM_EPISODES):
 
     if e > FINAL_EXPLORATION:
         e = e - e_decrease
-    
+
     # step = step + 1
     # if (step == TARGET_NETWORK_UPDATE_FREQUENCY):
     #     Q_target = Q.copy()
@@ -126,4 +126,4 @@ while (episode < NUM_EPISODES):
         episode = episode + 1
     scores.append(score)
 
-net.save(losses,rewards,scores)
+net.save(losses, rewards, scores)
