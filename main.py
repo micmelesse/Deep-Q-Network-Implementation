@@ -16,12 +16,12 @@ if (len(sys.argv) != 2):
     quit()
 
 
-
 # init ALE
 ale = atari_py.ALEInterface()
 pong_path = atari_py.get_game_path('breakout')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
+print("available actions {}".format(legal_actions))
 (screen_width, screen_height) = ale.getScreenDims()
 print("width/height: " + str(screen_width) + "/" + str(screen_height))
 
@@ -39,7 +39,7 @@ screen_data = np.zeros((screen_height, screen_width, 3), dtype=np.uint8)
 state1 = np.zeros((AGENT_HISTORY_LENGTH, screen_height,
                    screen_width, 3), dtype=np.uint8)
 state2 = np.zeros((AGENT_HISTORY_LENGTH, screen_height,
-                  screen_width, 3), dtype=np.uint8)
+                   screen_width, 3), dtype=np.uint8)
 
 # observe initial state
 a = np.random.choice(legal_actions)
@@ -50,7 +50,7 @@ for i in range(AGENT_HISTORY_LENGTH):
 
 episode = 0
 total_reward = 0.0
-while (episode < 4):
+while (episode < 1):
     exit = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -59,19 +59,19 @@ while (episode < 4):
     if (exit):
         break
 
-    ar = net.evaluate(net.preprocess(state1))
-    # print(ar)
-    a = np.argmax(ar)
-    reward = ale.act(a)
+    q_values = net.evaluate(net.preprocess(state1))
+    action = legal_actions[np.argmax(q_values)]
+    print ("action %d" % action)
+    reward = ale.act(action)
     total_reward += reward
     ale.getScreenRGB(screen_data)
     screen_data_rot = np.flipud(np.rot90(screen_data))
     screen.blit(pygame.pixelcopy.make_surface(screen_data_rot), (0, 0))
     pygame.display.flip()
 
-    for i in range(AGENT_HISTORY_LENGTH-1):
-        state2[i] = np.copy(state1[i+1])
-    state2[AGENT_HISTORY_LENGTH-1] = np.copy(screen_data)
+    for i in range(AGENT_HISTORY_LENGTH - 1):
+        state2[i] = np.copy(state1[i + 1])
+    state2[AGENT_HISTORY_LENGTH - 1] = np.copy(screen_data)
     state1 = np.copy(state2)
 
     if (ale.game_over()):

@@ -20,13 +20,14 @@ DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 10000
-NUM_EPISODES = 2
+NUM_EPISODES = 5
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
 pong_path = atari_py.get_game_path('breakout')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
+print("legal actions {}".format(legal_actions))
 num_of_actions = len(legal_actions)
 (screen_width, screen_height) = ale.getScreenDims()
 screen_data = np.zeros((screen_height, screen_width, 3),
@@ -81,7 +82,7 @@ while (episode < NUM_EPISODES):
     if (np.random.sample() < e):
         action = np.random.choice(legal_actions)
     else:
-        action = np.argmax(net.evaluate(net.preprocess(state1)))
+        action = legal_actions[np.argmax(net.evaluate(net.preprocess(state1)))]
 
     # carry out action and observe reward
     reward_sum = 0.0
