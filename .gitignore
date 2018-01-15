@@ -2,3 +2,4 @@ model*
 *.png
 *.ckpt.*
 aws.params
+*pycache*
