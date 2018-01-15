@@ -6,7 +6,6 @@
 import sys
 import atari_py
 import numpy as np
-from action_value_function import ActionValueFunction
 from network import network
 import random
 
@@ -116,15 +115,15 @@ while (episode < NUM_EPISODES):
 
     if e > FINAL_EXPLORATION:
         e = e - e_decrease
-    step = step + 1
-
+    
+    # step = step + 1
     # if (step == TARGET_NETWORK_UPDATE_FREQUENCY):
     #     Q_target = Q.copy()
     #     step = 0
 
     if (is_game_over):
         ale.reset_game()
-    episode = episode + 1
+        episode = episode + 1
     scores.append(score)
 
 net.save(losses,rewards,scores)
