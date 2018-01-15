@@ -86,7 +86,7 @@ while (episode < NUM_EPISODES):
 
     # carry out action and observe reward
     reward_sum = 0.0
-    print("action {}".format(action))
+    # print("action {}".format(action))
     for i in range(AGENT_HISTORY_LENGTH):
         r = ale.act(action)
         reward_sum = reward_sum + r
