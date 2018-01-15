@@ -83,7 +83,6 @@ class network:
         return np.expand_dims(np.stack(frames, axis=-1), axis=0)
 
     def save(self, losses, rewards, scores):
-
         save_dir = "model_{}".format(str(datetime.now().time()))
         os.makedirs(save_dir)
         plt.plot(losses)
@@ -95,3 +94,6 @@ class network:
         plt.plot(scores)
         plt.savefig('{}/score_plot.png'.format(save_dir), bbox_inches='tight')
         self.saver.save(self.sess, "{}/model.ckpt".format(save_dir))
+
+    def restore(self, save_dir):
+        self.saver.restore(self.sess, "{}/model.ckpt".format(save_dir))

@@ -1,58 +1,78 @@
 #!/usr/bin/env python
 
-# ale_python_test_pygame.py
-# Author: Ben Goodrich
-#
-# This modified ale_python_test1.py to display screen contents using pygame
+# Plays breakout using neural net restored from saved folder
+
 import sys
 import atari_py
 import numpy as np
 import pygame
+from network import network
+import os
 
+AGENT_HISTORY_LENGTH = 4
+
+if (len(sys.argv) != 2):
+    print("Usage: \"python main.py [save folder name]\"")
+    quit()
+
+# init ALE
 ale = atari_py.ALEInterface()
-
-max_frames_per_episode = ale.getInt("max_num_frames_per_episode")
-# ale.set("random_seed",123)
-
-random_seed = ale.getInt("random_seed")
-print("random_seed: " + str(random_seed))
-
-pong_path = atari_py.get_game_path('space_invaders')
+pong_path = atari_py.get_game_path('breakout')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
-
 (screen_width, screen_height) = ale.getScreenDims()
 print("width/height: " + str(screen_width) + "/" + str(screen_height))
+
+# init network
+net = network(screen_height, screen_width, len(legal_actions))
+net.restore(os.path.join('aws_models', sys.argv[1]))
 
 # init pygame
 pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Arcade Learning Environment Random Agent Display")
-
 pygame.display.flip()
 
 screen_data = np.zeros((screen_height, screen_width, 3), dtype=np.uint8)
+state1 = np.zeros((AGENT_HISTORY_LENGTH, screen_height,
+                   screen_width, 3), dtype=np.uint8)
+state2 = np.zeros((AGENT_HISTORY_LENGTH, screen_height,
+                  screen_width, 3), dtype=np.uint8)
+
+# observe initial state
+a = np.random.choice(legal_actions)
+for i in range(AGENT_HISTORY_LENGTH):
+    ale.act(a)
+    ale.getScreenRGB(screen_data)
+    state1[i] = np.copy(screen_data)
 
 episode = 0
 total_reward = 0.0
-while(episode < 4):
+while (episode < 4):
     exit = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit = True
             break
-    if(exit):
+    if (exit):
         break
 
-    a = legal_actions[np.random.randint(legal_actions.size)]
+    ar = net.evaluate(net.preprocess(state1))
+    # print(ar)
+    a = np.argmax(ar)
     reward = ale.act(a)
     total_reward += reward
     ale.getScreenRGB(screen_data)
     screen_data_rot = np.flipud(np.rot90(screen_data))
     screen.blit(pygame.pixelcopy.make_surface(screen_data_rot), (0, 0))
-
     pygame.display.flip()
-    if(ale.game_over()):
+
+    for i in range(AGENT_HISTORY_LENGTH-1):
+        state2[i] = np.copy(state1[i+1])
+    state2[AGENT_HISTORY_LENGTH-1] = np.copy(screen_data)
+    state1 = np.copy(state2)
+
+    if (ale.game_over()):
         episode_frame_number = ale.getEpisodeFrameNumber()
         frame_number = ale.getFrameNumber()
         print("Frame Number: " + str(frame_number) +

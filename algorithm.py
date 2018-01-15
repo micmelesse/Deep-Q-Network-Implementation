@@ -19,7 +19,7 @@ AGENT_HISTORY_LENGTH = 4
 DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
-FINAL_EXPLORATION_FRAME = 1000000
+FINAL_EXPLORATION_FRAME = 10000
 NUM_EPISODES = 2
 
 # initialize ALE interface
@@ -131,7 +131,7 @@ while (episode < NUM_EPISODES):
         episode = episode + 1
         scores.append(score)
         score = 0
-        print("--- Episode took %s seconds ---" % (time.time() - episode_time))
+        print("--- Episode %d took %s seconds ---" % (episode, time.time() - episode_time))
         episode_time = time.time()
 
 net.save(losses, rewards, scores)
