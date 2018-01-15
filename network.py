@@ -57,7 +57,7 @@ class network:
         self.loss = tf.reduce_sum(
             tf.square(self.q_target - self.q_predicted[0, self.ind]))
         self.optimizing_op = tf.train.GradientDescentOptimizer(
-            0.00001).minimize(self.loss)
+            0.0000001).minimize(self.loss)
 
         self.sess = tf.InteractiveSession()
         self.saver = tf.train.Saver()
