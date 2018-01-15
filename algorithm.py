@@ -82,14 +82,17 @@ while (episode < NUM_EPISODES):
         action = np.argmax(net.evaluate(net.preprocess(state1)))
 
     # carry out action and observe reward
+    reward = 0.0
     for i in range(AGENT_HISTORY_LENGTH):
-        reward = ale.act(action)
+        r = ale.act(action)
+        reward = reward + r
         rewards.append(reward)
-        score += reward
         if (ale.game_over()):
             is_game_over = 1
         ale.getScreenRGB(screen_data)
         state2[i] = np.copy(screen_data)
+    score = score + reward
+    # reward = reward/AGENT_HISTORY_LENGTH
 
     # store transition <s, a, r, s'> in replay memory D
     if (len(D) == REPLAY_MEMORY_SIZE):
@@ -124,6 +127,6 @@ while (episode < NUM_EPISODES):
     if (is_game_over):
         ale.reset_game()
         episode = episode + 1
-    scores.append(score)
+        scores.append(score)
 
 net.save(losses, rewards, scores)
