@@ -8,18 +8,18 @@ import atari_py
 import numpy as np
 from network import network
 import random
+import time
 
 # set parameters, these are in the paper
 REPLAY_MEMORY_SIZE = 1000000
 REPLAY_START_SIZE = int(REPLAY_MEMORY_SIZE / 50)
 REPLAY_MINIBATCH_SIZE = 32
 AGENT_HISTORY_LENGTH = 4
-TARGET_NETWORK_UPDATE_FREQUENCY = 10000
+# TARGET_NETWORK_UPDATE_FREQUENCY = 10000
 DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
-
 NUM_EPISODES = 1
 
 # initialize ALE interface
@@ -63,6 +63,7 @@ for i in range(REPLAY_START_SIZE):
 # main loop
 episode = 0
 step = 0
+score = 0
 e = INITIAL_EXPLORATION
 e_decrease = (INITIAL_EXPLORATION - FINAL_EXPLORATION) / \
     FINAL_EXPLORATION_FRAME
@@ -71,8 +72,9 @@ losses = []
 rewards = []
 scores = []
 net = network(screen_height, screen_width, num_of_actions)
+start_time = time.time()
+episode_time = start_time
 while (episode < NUM_EPISODES):
-    score = 0
     is_game_over = 0
 
     # select an action a
@@ -86,12 +88,12 @@ while (episode < NUM_EPISODES):
     for i in range(AGENT_HISTORY_LENGTH):
         r = ale.act(action)
         reward = reward + r
-        rewards.append(reward)
+        score = score + r
+        rewards.append(r)
         if (ale.game_over()):
             is_game_over = 1
         ale.getScreenRGB(screen_data)
         state2[i] = np.copy(screen_data)
-    score = score + reward
     # reward = reward/AGENT_HISTORY_LENGTH
 
     # store transition <s, a, r, s'> in replay memory D
@@ -128,5 +130,8 @@ while (episode < NUM_EPISODES):
         ale.reset_game()
         episode = episode + 1
         scores.append(score)
+        print("--- Episode took %s seconds ---" % (time.time() - episode_time))
+        episode_time = time.time()
 
 net.save(losses, rewards, scores)
+print("--- Program took %s seconds ---" % (time.time() - start_time))
