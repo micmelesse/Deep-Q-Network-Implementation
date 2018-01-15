@@ -11,7 +11,10 @@ from network import network
 import matplotlib.pyplot as plt
 
 
+
 AGENT_HISTORY_LENGTH = 4
+learning_rate = 0.0000001
+os.makedirs("screen_shots")
 
 if (len(sys.argv) != 2):
     print("Usage: \"python main.py [save folder name]\"")
@@ -28,7 +31,6 @@ print("available actions {}".format(legal_actions))
 print("width/height: " + str(screen_width) + "/" + str(screen_height))
 
 # init network
-learning_rate = 0.00025
 net = network(learning_rate,screen_height, screen_width, len(legal_actions))
 net.restore(os.path.join('aws_models', sys.argv[1]))
 
