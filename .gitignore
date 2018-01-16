@@ -6,4 +6,5 @@ model*
 aws.params
 *pycache*
 *checkpoint*
+aws_*
 
