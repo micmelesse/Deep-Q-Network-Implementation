@@ -18,15 +18,15 @@ AGENT_HISTORY_LENGTH = 4
 # TARGET_NETWORK_UPDATE_FREQUENCY = 10000
 DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
-FINAL_EXPLORATION = 0.1
+FINAL_EXPLORATION = 0.2
 FINAL_EXPLORATION_FRAME = 1000000
 learning_rate = 0.0000001
-NUM_EPISODES = 1
+NUM_EPISODES = 100
 
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
-pong_path = atari_py.get_game_path('breakout')
+pong_path = atari_py.get_game_path('pong')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
 # print("legal actions {}".format(legal_actions))
@@ -77,7 +77,9 @@ scores = []
 net = network(learning_rate, screen_height, screen_width, num_of_actions)
 start_time = time.time()
 episode_time = start_time
+n_frame = 0
 while (episode < NUM_EPISODES):
+    n_frame += 1
     is_game_over = 0
 
     # select an action a
@@ -135,7 +137,6 @@ while (episode < NUM_EPISODES):
         ale.reset_game()
         episode = episode + 1
         scores.append(score)
-        e = INITIAL_EXPLORATION
         score = 0
         print("--- Episode %d took %s seconds ---" %
               (episode, time.time() - episode_time))
