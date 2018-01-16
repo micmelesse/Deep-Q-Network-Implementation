@@ -11,10 +11,9 @@ from network import network
 import matplotlib.pyplot as plt
 
 
-
 AGENT_HISTORY_LENGTH = 4
 learning_rate = 0.0000001
-os.makedirs("screen_shots")
+# os.makedirs("screen_shots")
 
 if (len(sys.argv) != 2):
     print("Usage: \"python main.py [save folder name]\"")
@@ -47,7 +46,8 @@ state2 = np.zeros((AGENT_HISTORY_LENGTH, screen_height,
                    screen_width, 3), dtype=np.uint8)
 
 # observe initial state
-a = np.random.choice(legal_actions)
+# a = np.random.choice(legal_actions)
+a = legal_actions[1]
 for i in range(AGENT_HISTORY_LENGTH):
     ale.act(a)
     ale.getScreenRGB(screen_data)
@@ -67,12 +67,13 @@ while (episode < 1):
         break
 
     q_values = net.evaluate(net.preprocess(state1))
+    # print(q_values)
     action = legal_actions[np.argmax(q_values)]
     # print ("action %d" % action)
     reward = ale.act(action)
     total_reward += reward
     ale.getScreenRGB(screen_data)
-    plt.imsave("screen_shots/screen_shot_{}.png".format(n_frame), screen_data)
+    # plt.imsave("screen_shots/screen_shot_{}.png".format(n_frame), screen_data)
     screen_data_rot = np.flipud(np.rot90(screen_data))
     screen.blit(pygame.pixelcopy.make_surface(screen_data_rot), (0, 0))
     pygame.display.flip()

@@ -55,8 +55,7 @@ class network:
         self.q_target = tf.placeholder(dtype=tf.float32)
         self.ind = tf.placeholder(tf.int32)
 
-        self.loss = tf.reduce_sum(
-            tf.square(self.q_target - self.q_predicted[0, self.ind]))
+        self.loss = tf.square(self.q_target - self.q_predicted[0, self.ind])
         self.optimizing_op = tf.train.GradientDescentOptimizer(
             learning_rate).minimize(self.loss)
 

@@ -9,7 +9,6 @@ import numpy as np
 from network import network
 import random
 import time
-os.makedirs("save_dir")
 
 # set parameters, these are in the paper
 REPLAY_MEMORY_SIZE = 1000000
@@ -20,8 +19,9 @@ AGENT_HISTORY_LENGTH = 4
 DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
-FINAL_EXPLORATION_FRAME = 1000000
-NUM_EPISODES = 200
+FINAL_EXPLORATION_FRAME = 10000
+DESCEND_EXPLORATION = True
+NUM_EPISODES = 50
 learning_rate = 0.0000001
 
 # initialize ALE interface
@@ -41,9 +41,9 @@ state2 = np.zeros((AGENT_HISTORY_LENGTH, screen_height,
                    screen_width, 3), dtype=np.uint8)
 
 # observe initial state
-a = np.random.choice(legal_actions)
+a = random.randint(0, num_of_actions-1)
 for i in range(AGENT_HISTORY_LENGTH):
-    ale.act(a)
+    ale.act(legal_actions[a])
     ale.getScreenRGB(screen_data)
     state1[i] = np.copy(screen_data)
 
@@ -51,9 +51,9 @@ for i in range(AGENT_HISTORY_LENGTH):
 D = []
 for i in range(REPLAY_START_SIZE):
     is_game_over = 0
-    a = np.random.choice(legal_actions)
+    a = random.randint(0, num_of_actions-1)
     for j in range(AGENT_HISTORY_LENGTH):
-        r = ale.act(a)
+        r = ale.act(legal_actions[a])
         if (ale.game_over()):
             is_game_over = 1
         ale.getScreenRGB(screen_data)
@@ -82,15 +82,15 @@ while (episode < NUM_EPISODES):
 
     # select an action a
     if (np.random.sample() < e):
-        action = np.random.choice(legal_actions)
+        a = random.randint(0, num_of_actions-1)
     else:
-        action = legal_actions[np.argmax(net.evaluate(net.preprocess(state1)))]
+        a = np.argmax(net.evaluate(net.preprocess(state1)))
 
     # carry out action and observe reward
     reward_sum = 0.0
     # print("action {}".format(action))
     for i in range(AGENT_HISTORY_LENGTH):
-        r = ale.act(action)
+        r = ale.act(legal_actions[a])
         reward_sum = reward_sum + r
         if (ale.game_over()):
             is_game_over = 1
@@ -103,7 +103,7 @@ while (episode < NUM_EPISODES):
     # store transition <s, a, r, s'> in replay memory D
     if (len(D) == REPLAY_MEMORY_SIZE):
         D.pop(0)
-    D.append((np.copy(state1), action, reward_sum,
+    D.append((np.copy(state1), a, reward_sum,
               np.copy(state2), is_game_over))
 
     # sample random transitions <ss, aa, rr, ss'> from replay memory D
@@ -119,11 +119,11 @@ while (episode < NUM_EPISODES):
             target = r + DISCOUNT_FACTOR * np.max(q_target)
         # network.backpropagate((t - values[sample[1]]) ** 2)
         losses.append(net.backpropagate(net.preprocess(
-            sample[0]), np.argmax(q_target), target))
+            sample[0]), sample[1], target))
 
     state1 = np.copy(state2)
 
-    if e > FINAL_EXPLORATION:
+    if DESCEND_EXPLORATION and e > FINAL_EXPLORATION:
         e = e - e_decrease
 
     # step = step + 1
@@ -139,7 +139,7 @@ while (episode < NUM_EPISODES):
         print("--- Episode %d took %s seconds ---" %
               (episode, time.time() - episode_time))
         episode_time = time.time()
-        net.save(save_dir, losses, rewards, scores)
+        net.save(losses, rewards, scores)
 net.save(losses, rewards, scores)
 
 
