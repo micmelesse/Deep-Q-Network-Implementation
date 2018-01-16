@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Plays breakout using neural net restored from saved folder
+# Plays games using neural net restored from saved folder
 
 import os
 import sys
@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 
 AGENT_HISTORY_LENGTH = 4
+NUM_EPISODES = 10
 learning_rate = 0.0000001
 # os.makedirs("screen_shots")
 
@@ -22,7 +23,7 @@ if (len(sys.argv) != 2):
 
 # init ALE
 ale = atari_py.ALEInterface()
-pong_path = atari_py.get_game_path('breakout')
+pong_path = atari_py.get_game_path('pong')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
 print("available actions {}".format(legal_actions))
@@ -56,7 +57,7 @@ for i in range(AGENT_HISTORY_LENGTH):
 episode = 0
 n_frame = 0
 total_reward = 0.0
-while (episode < 1):
+while (episode < NUM_EPISODES):
     n_frame += 1
     exit = False
     for event in pygame.event.get():
@@ -67,7 +68,8 @@ while (episode < 1):
         break
 
     q_values = net.evaluate(net.preprocess(state1))
-    # print(q_values)
+    # q_values[0][2] = 0.99 * q_values[0][2]
+    print(q_values)
     action = legal_actions[np.argmax(q_values)]
     # print ("action %d" % action)
     reward = ale.act(action)
@@ -81,6 +83,8 @@ while (episode < 1):
     for i in range(AGENT_HISTORY_LENGTH - 1):
         state2[i] = np.copy(state1[i + 1])
     state2[AGENT_HISTORY_LENGTH - 1] = np.copy(screen_data)
+    if (np.array_equal(state1, state2)):
+        ale.act(legal_actions[1])
     state1 = np.copy(state2)
 
     if (ale.game_over()):

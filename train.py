@@ -22,11 +22,11 @@ FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 40000
 DESCEND_EXPLORATION = True
 NUM_EPISODES = 200
-learning_rate = 0.00025
+learning_rate = 0.000001
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
-pong_path = atari_py.get_game_path('breakout')
+pong_path = atari_py.get_game_path('pong')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
 print("legal actions {}".format(legal_actions))
