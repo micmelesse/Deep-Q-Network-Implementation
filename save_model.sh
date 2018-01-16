@@ -1,0 +1,1 @@
+mv aws_model/model model_$1
