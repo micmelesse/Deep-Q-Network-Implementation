@@ -63,6 +63,8 @@ class network:
         self.saver = tf.train.Saver()
         tf.global_variables_initializer().run()
 
+        self.save_dir = "./model"
+
     # returns a 1-D array whose indices correspond to actions, and values
     # correspond to the Q values of their respective actions
     def evaluate(self, state):
@@ -82,19 +84,25 @@ class network:
             frames.append(np.array(f))
         return np.expand_dims(np.stack(frames, axis=-1), axis=0)
 
-    def save(self, losses, rewards, scores):
-        save_dir = "model_{}".format(str(datetime.now().time()))
-        os.makedirs(save_dir)
-        plt.plot(losses[10:])
-        plt.savefig('{}/loss_plot.png'.format(save_dir), bbox_inches='tight')
+    def save(self, save_dir):
+        if not os.path.isdir(save_dir):
+            os.makedirs(save_dir)
+        self.saver.save(self.sess, "{}/model.ckpt".format(save_dir))
+        self.save_dir = save_dir
+
+    def plot(self, losses, rewards, scores):
+        plt.plot(losses)
+        plt.savefig('{}/loss_plot.png'.format(self.save_dir),
+                    bbox_inches='tight')
         plt.clf()
-        plt.plot(rewards[10:])
-        plt.savefig('{}/reward_plot.png'.format(save_dir), bbox_inches='tight')
+        plt.plot(rewards)
+        plt.savefig('{}/reward_plot.png'.format(self.save_dir),
+                    bbox_inches='tight')
         plt.clf()
         plt.plot(scores)
-        plt.savefig('{}/score_plot.png'.format(save_dir), bbox_inches='tight')
+        plt.savefig('{}/score_plot.png'.format(self.save_dir),
+                    bbox_inches='tight')
         plt.clf()
-        self.saver.save(self.sess, "{}/model.ckpt".format(save_dir))
 
     def restore(self, save_dir):
         self.saver.restore(self.sess, "{}/model.ckpt".format(save_dir))

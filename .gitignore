@@ -5,4 +5,5 @@ model*
 *.ckpt.*
 aws.params
 *pycache*
+*checkpoint*
 

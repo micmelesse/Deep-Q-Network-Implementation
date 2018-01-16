@@ -9,7 +9,6 @@ import numpy as np
 from network import network
 import random
 import time
-os.makedirs("save_dir")
 
 # set parameters, these are in the paper
 REPLAY_MEMORY_SIZE = 1000000
@@ -21,15 +20,16 @@ DISCOUNT_FACTOR = 0.99
 INITIAL_EXPLORATION = 1.0
 FINAL_EXPLORATION = 0.1
 FINAL_EXPLORATION_FRAME = 1000000
-NUM_EPISODES = 200
 learning_rate = 0.0000001
+NUM_EPISODES = 1
+
 
 # initialize ALE interface
 ale = atari_py.ALEInterface()
 pong_path = atari_py.get_game_path('breakout')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
-print("legal actions {}".format(legal_actions))
+# print("legal actions {}".format(legal_actions))
 num_of_actions = len(legal_actions)
 (screen_width, screen_height) = ale.getScreenDims()
 screen_data = np.zeros((screen_height, screen_width, 3),
@@ -135,12 +135,13 @@ while (episode < NUM_EPISODES):
         ale.reset_game()
         episode = episode + 1
         scores.append(score)
+        e = INITIAL_EXPLORATION
         score = 0
         print("--- Episode %d took %s seconds ---" %
               (episode, time.time() - episode_time))
         episode_time = time.time()
-        net.save(save_dir, losses, rewards, scores)
-net.save(losses, rewards, scores)
+        net.save("model/episode_%d" % episode)
+        net.plot(losses, rewards, scores)
 
 
 print("--- Program took %s seconds ---" % (time.time() - start_time))
