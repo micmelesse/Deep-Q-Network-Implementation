@@ -5,4 +5,5 @@ model*
 *.ckpt.*
 aws.params
 *pycache*
-
+scp_aws.sh
+ssh_aws.sh
