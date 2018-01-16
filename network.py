@@ -103,6 +103,10 @@ class network:
         plt.savefig('{}/score_plot.png'.format(self.save_dir),
                     bbox_inches='tight')
         plt.clf()
+        np.save("%s/losses" % self.save_dir, losses)
+        np.save("%s/rewards" % self.save_dir, rewards)
+        np.save("%s/scores" % self.save_dir, scores)
 
     def restore(self, save_dir):
         self.saver.restore(self.sess, "{}/model.ckpt".format(save_dir))
+        
