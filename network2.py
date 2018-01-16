@@ -1,4 +1,4 @@
-# neural network, uses gradient descent optimizing algorithm
+# neural network, uses RMSProp optimizing algorithm
 
 import os
 import numpy as np
@@ -57,8 +57,10 @@ class network:
 
         self.loss = tf.reduce_sum(
             tf.square(self.q_target - self.q_predicted[0, self.ind]))
-        self.optimizing_op = tf.train.GradientDescentOptimizer(
-            learning_rate).minimize(self.loss)
+        self.optimizing_op = tf.train.RMSPropOptimizer(
+            learning_rate=learning_rate,
+            momentum=0.95
+        ).minimize(self.loss)
 
         self.sess = tf.InteractiveSession()
         self.saver = tf.train.Saver()

@@ -7,7 +7,7 @@
 import sys
 import atari_py
 import numpy as np
-from network import network
+from network2 import network
 import random
 import time
 
