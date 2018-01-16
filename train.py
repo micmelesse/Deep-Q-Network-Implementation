@@ -70,7 +70,7 @@ score = 0
 e = INITIAL_EXPLORATION
 e_decrease = (INITIAL_EXPLORATION - FINAL_EXPLORATION) / \
     FINAL_EXPLORATION_FRAME
-
+print(e_decrease)
 losses = []
 rewards = []
 scores = []
