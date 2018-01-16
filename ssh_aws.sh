@@ -1,2 +1,2 @@
 source aws.params
-ssh -i $key ubuntu@$dns
+ssh -i $key ec2-user@$dns
