@@ -1,8 +1,5 @@
 *.pem
 *.params
-model*
-*.png
-*.ckpt.*
 aws.params
 *pycache*
 scp_aws.sh

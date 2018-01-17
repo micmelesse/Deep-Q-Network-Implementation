@@ -23,7 +23,7 @@ if (len(sys.argv) != 2):
 
 # init ALE
 ale = atari_py.ALEInterface()
-pong_path = atari_py.get_game_path('pong')
+pong_path = atari_py.get_game_path('breakout')
 ale.loadROM(pong_path)
 legal_actions = ale.getMinimalActionSet()
 print("available actions {}".format(legal_actions))
@@ -31,8 +31,8 @@ print("available actions {}".format(legal_actions))
 print("width/height: " + str(screen_width) + "/" + str(screen_height))
 
 # init network
-net = network(learning_rate,screen_height, screen_width, len(legal_actions))
-net.restore(os.path.join('aws_models', sys.argv[1]))
+net = network(learning_rate, screen_height, screen_width, len(legal_actions))
+net.restore(sys.argv[1])
 
 # init pygame
 pygame.init()
